@@ -18,14 +18,14 @@
 
   <style>
     :root {
-      /* Palette: Zinc & Indigo */
-      --bg-app: #09090b;
-      --bg-sidebar: #18181b;
-      --bg-panel: #27272a;
+      /* Palette: Deep Space & Neon */
+      --bg-app: #050505;
+      --bg-sidebar: rgba(15, 15, 17, 0.85);
+      --bg-panel: #18181b;
       --bg-input: #27272a;
       --bg-input-focus: #3f3f46;
-      --border-color: #3f3f46;
-      --border-subtle: #27272a;
+      --border-color: #27272a;
+      --border-subtle: rgba(255, 255, 255, 0.08);
       
       --text-main: #f4f4f5;
       --text-muted: #a1a1aa;
@@ -33,15 +33,16 @@
 
       --accent-primary: #6366f1; /* Indigo 500 */
       --accent-hover: #4f46e5;   /* Indigo 600 */
+      --accent-glow: rgba(99, 102, 241, 0.4);
       --accent-surface: rgba(99, 102, 241, 0.1);
 
       --success: #10b981;
       --warning: #f59e0b;
       --error: #ef4444;
 
-      --radius-sm: 6px;
-      --radius-md: 10px;
-      --radius-lg: 14px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
       
       --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       
@@ -58,10 +59,16 @@
       padding: 0;
       box-sizing: border-box;
       outline: none;
+      scrollbar-width: thin;
+      scrollbar-color: var(--bg-input-focus) transparent;
     }
 
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background-color: var(--bg-input-focus); border-radius: 20px; }
+
     body {
-      background-color: var(--bg-app);
+      background: radial-gradient(circle at top right, #1a1a2e 0%, var(--bg-app) 40%);
       color: var(--text-main);
       font-family: var(--font-sans);
       height: 100vh;
@@ -89,18 +96,20 @@
       font-size: 10px;
       padding: 2px 6px;
       border-radius: 4px;
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     .badge-free { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border-color); }
-    .badge-pro { background: var(--accent-surface); color: var(--accent-primary); border: 1px solid var(--accent-primary); }
+    .badge-pro { background: var(--accent-surface); color: var(--accent-primary); border: 1px solid var(--accent-primary); box-shadow: 0 0 10px var(--accent-surface); }
     .badge-unlimited { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid var(--success); }
 
     /* --- Sidebar --- */
     .sidebar {
       width: 280px;
       background-color: var(--bg-sidebar);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-right: 1px solid var(--border-subtle);
       display: flex;
       flex-direction: column;
@@ -128,6 +137,7 @@
       color: white;
       font-weight: bold;
       font-size: 18px;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
     }
 
     .btn-primary {
@@ -136,19 +146,19 @@
       border: none;
       padding: 0.75rem 1rem;
       border-radius: var(--radius-sm);
-      font-weight: 500;
+      font-weight: 600;
       font-size: 0.9rem;
       display: flex;
       align-items: center;
       gap: 8px;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
       width: 100%;
       justify-content: center;
     }
-    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(255,255,255,0.1); }
 
     .btn-secondary {
-      background-color: var(--bg-panel);
+      background-color: rgba(255,255,255,0.05);
       color: var(--text-main);
       border: 1px solid var(--border-color);
       padding: 0.75rem 1rem;
@@ -159,8 +169,9 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      transition: all 0.2s;
     }
-    .btn-secondary:hover { background-color: var(--bg-input-focus); }
+    .btn-secondary:hover { background-color: var(--bg-input-focus); border-color: var(--text-muted); }
 
     .btn-ghost {
       background: transparent;
@@ -177,16 +188,16 @@
       text-align: left;
     }
     .btn-ghost:hover {
-      background: var(--bg-panel);
+      background: rgba(255,255,255,0.05);
       color: var(--text-main);
     }
     
     .section-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: var(--text-faint);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.08em;
       margin: 1.5rem 0 0.5rem 0.5rem;
     }
 
@@ -205,17 +216,18 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      transition: background 0.2s, color 0.2s;
+      transition: all 0.2s;
       position: relative;
     }
     .chat-item:hover {
-      background: var(--bg-panel);
+      background: rgba(255,255,255,0.05);
       color: var(--text-main);
     }
     .chat-item.active {
-      background: var(--bg-panel);
+      background: rgba(99, 102, 241, 0.1);
       color: var(--text-main);
       font-weight: 500;
+      border: 1px solid rgba(99, 102, 241, 0.2);
     }
     .chat-item .delete-chat {
       position: absolute;
@@ -230,20 +242,21 @@
     .chat-item .delete-chat:hover { color: var(--error); }
 
     .credit-widget {
-      background: var(--bg-panel);
+      background: linear-gradient(to right, #18181b, #202024);
       border-radius: var(--radius-md);
       padding: 1rem;
       margin-top: auto;
       border: 1px solid var(--border-subtle);
       cursor: pointer;
-      transition: border-color 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
     }
-    .credit-widget:hover { border-color: var(--text-faint); }
+    .credit-widget:hover { border-color: var(--text-muted); transform: translateY(-2px); }
     .credit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
-    .credit-amount { font-size: 1.1rem; font-weight: 600; color: var(--text-main); }
+    .credit-amount { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
     .credit-label { font-size: 0.75rem; color: var(--text-muted); }
-    .progress-bar { height: 4px; background: var(--bg-input-focus); border-radius: 2px; overflow: hidden; margin-top: 8px; }
-    .progress-fill { height: 100%; background: var(--accent-primary); width: 100%; transition: width 0.3s; }
+    .progress-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; overflow: hidden; margin-top: 8px; }
+    .progress-fill { height: 100%; background: var(--accent-primary); width: 100%; transition: width 0.3s; box-shadow: 0 0 8px var(--accent-primary); }
 
     /* --- Main Content --- */
     .main {
@@ -260,8 +273,12 @@
       align-items: center;
       justify-content: space-between;
       padding: 0 1.5rem;
-      background: rgba(9, 9, 11, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(5, 5, 5, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     
     .model-selector {
@@ -274,8 +291,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.2s;
     }
-    .model-selector:hover { opacity: 0.8; }
+    .model-selector:hover { background: rgba(255,255,255,0.05); }
 
     .chat-area {
       flex: 1;
@@ -303,13 +323,14 @@
       justify-content: center;
       font-size: 14px;
       font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
-    .msg-avatar.ai { background: var(--accent-primary); color: white; }
+    .msg-avatar.ai { background: var(--accent-primary); color: white; box-shadow: 0 0 15px rgba(99,102,241,0.3); }
     .msg-avatar.human { background: var(--bg-panel); color: var(--text-muted); border: 1px solid var(--border-subtle); }
 
     .msg-content {
       max-width: 80%;
-      line-height: 1.6;
+      line-height: 1.7;
       font-size: 0.95rem;
     }
     .user .msg-content {
@@ -317,6 +338,7 @@
       padding: 0.8rem 1.2rem;
       border-radius: var(--radius-lg);
       border-top-right-radius: 2px;
+      border: 1px solid var(--border-subtle);
     }
     .ai .msg-content {
       padding-top: 0.4rem;
@@ -326,7 +348,7 @@
     .msg-content p { margin-bottom: 0.8rem; }
     .msg-content p:last-child { margin-bottom: 0; }
     .msg-content pre {
-      background: #1e1e1e;
+      background: #111;
       border-radius: var(--radius-sm);
       padding: 1rem;
       margin: 1rem 0;
@@ -345,8 +367,8 @@
     /* --- Input Area --- */
     .input-container {
       padding: 1.5rem 15%;
-      background: var(--bg-app);
-      border-top: 1px solid var(--border-subtle);
+      background: transparent;
+      background: linear-gradient(to top, var(--bg-app) 80%, transparent 100%);
     }
     
     .input-box {
@@ -356,11 +378,12 @@
       padding: 0.75rem 1rem;
       display: flex;
       flex-direction: column;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
     }
     .input-box:focus-within {
       border-color: var(--accent-primary);
-      box-shadow: 0 0 0 2px var(--accent-surface);
+      box-shadow: 0 0 0 2px var(--accent-surface), 0 10px 25px -5px rgba(0,0,0,0.3);
       background: var(--bg-input-focus);
     }
 
@@ -393,39 +416,40 @@
       align-items: center;
       justify-content: center;
     }
-    .action-btn:hover { background: var(--bg-panel); color: var(--text-main); }
+    .action-btn:hover { background: rgba(255,255,255,0.1); color: var(--text-main); }
     
     .send-btn {
       background: var(--accent-primary);
       color: white;
-      border-radius: 6px;
+      border-radius: 8px;
       width: 32px;
       height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
       border: none;
+      transition: all 0.2s;
     }
-    .send-btn:hover { background: var(--accent-hover); }
-    .send-btn:disabled { background: var(--bg-panel); color: var(--text-faint); cursor: not-allowed; }
+    .send-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+    .send-btn:disabled { background: var(--bg-panel); color: var(--text-faint); cursor: not-allowed; transform: none; }
 
     /* --- Modals --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(5px);
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(8px);
       z-index: 100;
       display: none;
       align-items: center;
       justify-content: center;
     }
     .modal {
-      background: var(--bg-sidebar);
+      background: #121214;
       border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-lg);
       width: 500px;
       max-width: 90%;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       flex-direction: column;
@@ -451,6 +475,7 @@
       padding: 0.75rem;
       border-radius: var(--radius-sm);
       font-size: 0.9rem;
+      transition: border-color 0.2s;
     }
     .form-textarea { resize: vertical; min-height: 100px; }
     .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--accent-primary); }
@@ -459,7 +484,7 @@
         font-size: 0.8rem;
         color: var(--text-muted);
         margin-top: 0.5rem;
-        background: var(--bg-panel);
+        background: rgba(255,255,255,0.05);
         padding: 0.5rem;
         border-radius: 4px;
         border: 1px solid var(--border-subtle);
@@ -482,9 +507,10 @@
         transition: all 0.2s;
     }
     .gpt-tab.active {
-        background: var(--bg-panel);
+        background: rgba(255,255,255,0.05);
         color: var(--text-main);
         font-weight: 600;
+        border: 1px solid var(--border-subtle);
     }
     .gpt-category-label {
         font-size: 0.75rem;
@@ -510,7 +536,7 @@
       transition: all 0.2s;
       position: relative;
     }
-    .gpt-card:hover { transform: translateY(-2px); border-color: var(--accent-primary); }
+    .gpt-card:hover { transform: translateY(-4px); border-color: var(--accent-primary); box-shadow: 0 10px 20px -5px rgba(0,0,0,0.4); }
     .gpt-icon {
       width: 48px; height: 48px;
       background: var(--bg-input);
@@ -518,6 +544,7 @@
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 0.8rem;
       font-size: 24px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
     }
     .gpt-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
     .gpt-desc { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
@@ -553,7 +580,7 @@
         background: var(--bg-panel);
         border: 1px solid var(--border-color);
         border-radius: var(--radius-md);
-        padding: 1rem;
+        padding: 1.5rem 1rem;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -562,33 +589,37 @@
         position: relative;
         overflow: hidden;
     }
-    .plan-tier:hover { transform: translateY(-4px); }
-    .plan-tier.current { border-color: var(--text-main); box-shadow: 0 0 0 1px var(--text-main); }
+    .plan-tier:hover { transform: translateY(-4px); border-color: var(--text-muted); }
+    .plan-tier.current { border-color: var(--text-main); box-shadow: 0 0 0 2px var(--text-main); }
+    .plan-tier.disabled { opacity: 0.5; filter: grayscale(0.8); pointer-events: none; }
     .plan-tier.ultra {
         border-color: #f43f5e;
-        background: linear-gradient(180deg, rgba(244, 63, 94, 0.1) 0%, var(--bg-panel) 100%);
+        background: linear-gradient(180deg, rgba(244, 63, 94, 0.05) 0%, var(--bg-panel) 100%);
     }
 
-    .plan-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
-    .plan-price { font-size: 1.4rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem; }
-    .plan-reset { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 1rem; }
-    .plan-credits { font-size: 0.9rem; font-weight: 600; color: var(--accent-primary); margin-bottom: 1rem; }
+    .plan-name { font-size: 1rem; font-weight: 800; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+    .plan-price { font-size: 1.6rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.2rem; }
+    .plan-reset { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; }
+    .plan-credits { font-size: 0.9rem; font-weight: 600; color: var(--accent-primary); margin-bottom: 1.5rem; }
     
-    .plan-features { flex: 1; width: 100%; font-size: 0.75rem; color: var(--text-muted); text-align: left; margin-bottom: 1rem; }
-    .feature-item { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
-    .feature-item i { width: 12px; height: 12px; }
+    .plan-features { flex: 1; width: 100%; font-size: 0.8rem; color: var(--text-muted); text-align: left; margin-bottom: 1.5rem; }
+    .feature-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .feature-item i { width: 14px; height: 14px; stroke-width: 3px; }
 
     .plan-btn {
         width: 100%;
-        padding: 0.6rem;
+        padding: 0.8rem;
         background: var(--bg-input);
         border: 1px solid var(--border-color);
         color: var(--text-main);
         border-radius: var(--radius-sm);
         font-weight: 600;
-        font-size: 0.8rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.2s;
     }
-    .plan-btn:hover { background: var(--bg-input-focus); }
+    .plan-btn:hover { background: var(--text-main); color: var(--bg-app); }
     .plan-tier.ultra .plan-btn { background: #f43f5e; border-color: #f43f5e; color: white; }
     .plan-tier.ultra .plan-btn:hover { background: #e11d48; }
 
@@ -596,13 +627,14 @@
       position: fixed; bottom: 20px; right: 20px;
       background: var(--bg-panel);
       border: 1px solid var(--border-color);
-      padding: 1rem;
+      padding: 1rem 1.5rem;
       border-radius: var(--radius-sm);
       color: var(--text-main);
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       z-index: 200;
       display: none;
       animation: fadeIn 0.3s;
+      font-weight: 500;
     }
 
     /* Mobile */
@@ -656,7 +688,7 @@
         <div class="progress-fill" id="creditProgress" style="width: 100%"></div>
       </div>
       <div style="font-size: 10px; color: var(--text-faint); margin-top: 5px; text-align: right;" id="resetTimer">
-        Resets in 12h
+        Resets in 16h
       </div>
     </div>
   </div>
@@ -853,11 +885,11 @@
 
       // --- CONFIGURATION ---
       const PLANS = {
-        free: { id: 'free', name: 'Free', price: 0, credits: 20.00, resetHours: 12, delay: 5000, color: 'var(--plan-free)', features: ['Standard Queue', 'Safe Mode Only', 'Basic Models'] },
+        free: { id: 'free', name: 'Free', price: 0, credits: 20.00, resetHours: 16, delay: 5000, color: 'var(--plan-free)', features: ['Standard Queue', 'Safe Mode Only', 'Basic Models'] },
         beginner: { id: 'beginner', name: 'Beginner', price: 5, credits: 5.00, resetHours: 12, delay: 2000, color: 'var(--plan-beginner)', features: ['No Filters (18+)', 'Reduced Queue', 'Standard Models'] },
         starter: { id: 'starter', name: 'Starter', price: 15, credits: 15.00, resetHours: 12, delay: 0, color: 'var(--plan-starter)', features: ['No Filters (18+)', 'Instant Access', 'API Key Unlock'] },
-        pro: { id: 'pro', name: 'Pro', price: 200, credits: 200.00, resetHours: 12, delay: 0, color: 'var(--plan-pro)', features: ['No Filters (18+)', 'God Mode Access', 'Priority Support'] },
-        ultra: { id: 'ultra', name: 'Ultra', price: 1000, credits: 1000.00, resetHours: 24, delay: 0, color: 'var(--plan-ultra)', features: ['No Filters (18+)', 'Max Context', '24h Reset', 'Dedicated GPU'] }
+        pro: { id: 'pro', name: 'Pro', price: 200, credits: 200.00, resetHours: 12, delay: 0, color: 'var(--plan-pro)', features: ['No Filters (18+)', 'God Mode Access', 'Priority Support'], disabled: true },
+        ultra: { id: 'ultra', name: 'Ultra', price: 1000, credits: 1000.00, resetHours: 24, delay: 0, color: 'var(--plan-ultra)', features: ['No Filters (18+)', 'Max Context', '24h Reset', 'Dedicated GPU'], disabled: true }
       };
 
       // --- STATE ---
@@ -992,13 +1024,18 @@
           els.plansGrid.innerHTML = '';
           Object.values(PLANS).forEach(p => {
               const isCurrent = STATE.plan === p.id;
+              const isDisabled = p.disabled === true;
               const div = document.createElement('div');
-              div.className = `plan-tier ${p.id} ${isCurrent ? 'current' : ''}`;
+              div.className = `plan-tier ${p.id} ${isCurrent ? 'current' : ''} ${isDisabled ? 'disabled' : ''}`;
               
               let featuresHtml = p.features.map(f => `
                   <div class="feature-item">
                      <i data-feather="check" style="color:${p.color}"></i> ${f}
                   </div>`).join('');
+
+              let btnText = isCurrent ? 'Current Plan' : 'Select';
+              if(p.price > PLANS[STATE.plan].price && !isCurrent) btnText = 'Upgrade';
+              if(isDisabled) btnText = 'Sold Out';
 
               div.innerHTML = `
                   <div class="plan-name" style="color:${p.color}">${p.name}</div>
@@ -1006,8 +1043,8 @@
                   <div class="plan-reset">Per Month</div>
                   <div class="plan-credits">$${p.credits.toFixed(0)} Credits / ${p.resetHours}h</div>
                   <div class="plan-features">${featuresHtml}</div>
-                  <button class="plan-btn" onclick="switchPlan('${p.id}')">
-                      ${isCurrent ? 'Current Plan' : (p.price > PLANS[STATE.plan].price ? 'Upgrade' : 'Select')}
+                  <button class="plan-btn" ${isDisabled ? 'disabled' : ''} onclick="switchPlan('${p.id}')">
+                      ${btnText}
                   </button>
               `;
               els.plansGrid.appendChild(div);
@@ -1016,6 +1053,7 @@
       }
 
       window.switchPlan = function(planId) {
+          if (PLANS[planId].disabled) return;
           STATE.plan = planId;
           const planData = PLANS[planId];
           STATE.credits = planData.credits;
