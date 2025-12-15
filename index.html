@@ -10,8 +10,8 @@
   <script src="https://unpkg.com/feather-icons"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github-dark.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  <!-- Pinned Marked.js version for stability -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <!-- Updated Marked.js to v12.0.2 for stability and ESM/UMD compatibility -->
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" onload="if(window.renderMathInElement) renderMathInElement(document.body);"></script>
@@ -942,40 +942,50 @@
         window.URL.revokeObjectURL(url);
     };
 
-    // --- MARKED CONFIG ---
-    if (window.marked) {
-        const renderer = new marked.Renderer();
-        renderer.code = function(code, language) {
-            const validLang = !!(language && window.hljs && hljs.getLanguage(language));
-            const highlighted = validLang ? hljs.highlight(code, { language }).value : (window.hljs ? hljs.highlightAuto(code).value : code);
-            const langDisplay = (language || 'TEXT').toUpperCase();
-            const encodedCode = encodeURIComponent(code);
-            const ext = language ? language.split(' ')[0] : 'txt';
-            
-            // Inline SVGs to avoid 'Script Error' from feather.replace() inside loops
-            const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-            const downloadIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+    // --- ROBUST MARKED CONFIG ---
+    // Helper to safely parse markdown avoiding "replace is not a function" errors
+    window.safeMarkedParse = function(text) {
+        if (typeof text !== 'string') {
+            text = String(text || '');
+        }
+        try {
+            // Marked v12+ support
+            return window.marked ? marked.parse(text) : text;
+        } catch (e) {
+            console.warn('Markdown parsing failed:', e);
+            return text; // Fallback to raw text
+        }
+    };
 
-            return `
-              <div class="code-wrapper">
-                <div class="code-header">
-                  <span class="code-lang">${langDisplay}</span>
-                  <div class="code-actions">
-                     <button class="code-action-btn" onclick="window.copyCode('${encodedCode}', this)">${copyIcon} Copy</button>
-                     <button class="code-action-btn" onclick="window.downloadCode('${encodedCode}', '${ext}')">${downloadIcon} Download</button>
+    if (window.marked) {
+        const renderer = {
+          code(code, infostring, escaped) {
+              const language = (infostring || '').match(/\S*/)[0];
+              const validLang = !!(language && window.hljs && hljs.getLanguage(language));
+              const highlighted = validLang ? hljs.highlight(code, { language }).value : (window.hljs ? hljs.highlightAuto(code).value : code);
+              const langDisplay = (language || 'TEXT').toUpperCase();
+              const encodedCode = encodeURIComponent(code);
+              const ext = language || 'txt';
+              
+              const copyIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+              const downloadIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`;
+
+              return `
+                <div class="code-wrapper">
+                  <div class="code-header">
+                    <span class="code-lang">${langDisplay}</span>
+                    <div class="code-actions">
+                       <button class="code-action-btn" onclick="window.copyCode('${encodedCode}', this)">${copyIcon} Copy</button>
+                       <button class="code-action-btn" onclick="window.downloadCode('${encodedCode}', '${ext}')">${downloadIcon} Download</button>
+                    </div>
                   </div>
+                  <pre><code class="hljs ${language}">${highlighted}</code></pre>
                 </div>
-                <pre><code class="hljs ${language}">${highlighted}</code></pre>
-              </div>
-            `;
+              `;
+          }
         };
         
-        // Modern configuration approach
-        if (marked.use) {
-          marked.use({ renderer: renderer });
-        } else {
-          marked.setOptions({ renderer: renderer });
-        }
+        marked.use({ renderer });
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -1196,7 +1206,7 @@
         const safeText = (text === null || text === undefined) ? "" : String(text);
         
         if (role === 'ai') {
-            html += marked.parse(safeText);
+            html += window.safeMarkedParse(safeText);
         } else {
             // For user messages, simple line break replacement is usually sufficient, 
             // but we ensure safe string conversion first.
@@ -1217,8 +1227,7 @@
 
       function updateAiMessage(contentDiv, text) {
           // --- SAFE MARKED PARSING ---
-          const safeText = (text === null || text === undefined) ? "" : String(text);
-          contentDiv.innerHTML = marked.parse(safeText);
+          contentDiv.innerHTML = window.safeMarkedParse(text);
           
           if (window.hljs) contentDiv.parentNode.querySelectorAll('pre code').forEach((block) => hljs.highlightElement(block));
           // DO NOT CALL feather.replace() HERE. It causes the Script Error during rapid typing.
