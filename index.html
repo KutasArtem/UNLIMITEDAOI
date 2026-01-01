@@ -581,9 +581,10 @@
     /* Plans New Grid */
     .plans-container {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Min width increased */
         gap: 1rem;
-        height: 100%;
+        /* height: 100%; REMOVED to allow buttons to show */
+        padding-bottom: 1rem;
     }
     .plan-tier {
         background: var(--bg-panel);
@@ -627,10 +628,12 @@
         text-transform: uppercase;
         letter-spacing: 0.5px;
         transition: all 0.2s;
+        margin-top: auto; /* Push to bottom */
     }
     .plan-btn:hover { background: var(--text-main); color: var(--bg-app); }
     .plan-tier.ultra .plan-btn { background: #f43f5e; border-color: #f43f5e; color: white; }
     .plan-tier.ultra .plan-btn:hover { background: #e11d48; }
+    .plan-btn:disabled { opacity: 0.7; cursor: not-allowed; background: var(--bg-input); color: var(--text-muted); }
 
     .toast {
       position: fixed; bottom: 20px; right: 20px;
@@ -1120,11 +1123,12 @@
                      <i data-feather="${isLocked && f.includes('Requires') ? 'lock' : 'check'}" style="color:${isLocked && f.includes('Requires') ? 'var(--text-muted)' : p.color}"></i> ${f}
                   </div>`).join('');
 
-              let btnText = isCurrent ? 'Current Plan' : 'Select';
+              let btnText = isCurrent ? 'Active Plan' : 'Select';
               if(p.price > PLANS[STATE.plan].price && !isCurrent) btnText = 'Upgrade';
               
               if (isLocked) {
-                  btnText = `Chat ${p.req - STATE.stats.totalMessages} more`;
+                  const needed = p.req - STATE.stats.totalMessages;
+                  btnText = `Locked (${needed} msgs left)`;
               }
 
               div.innerHTML = `
@@ -1143,6 +1147,8 @@
       }
 
       window.switchPlan = function(planId) {
+          if(STATE.plan === planId) return;
+
           const req = PLANS[planId].req;
           if (STATE.stats.totalMessages < req) {
               showToast(`You need to send ${req - STATE.stats.totalMessages} more messages to unlock ${PLANS[planId].name}.`);
@@ -1155,7 +1161,7 @@
           STATE.lastReset = Date.now();
           localStorage.setItem('user_plan', planId);
           saveCredits();
-          els.plansModal.style.display = 'none';
+          // els.plansModal.style.display = 'none'; // Keep open to show state change
           renderPlans();
           showToast(`Switched to ${planData.name} Plan!`);
       }
@@ -1279,8 +1285,25 @@
         content.className = 'msg-content';
         let html = '';
         if (imageSrc) html += `<img src="${imageSrc}" style="max-width:100%; border-radius:8px; margin-bottom:10px; border:1px solid var(--border-subtle);">`;
-        if (role === 'ai') html += marked.parse(text || "");
-        else html += (text || "").replace(/\n/g, '<br>');
+        
+        // --- SAFE STRING HANDLING FIX ---
+        let textToRender = "";
+        if (Array.isArray(text)) {
+             // Handle array of content blocks (common in Claude)
+             textToRender = text.map(t => {
+                 if(typeof t === 'string') return t;
+                 if(t.text) return t.text;
+                 return JSON.stringify(t);
+             }).join('\n');
+        } else if (text !== null && text !== undefined) {
+             textToRender = String(text);
+        } else {
+             textToRender = "";
+        }
+
+        if (role === 'ai') html += marked.parse(textToRender);
+        else html += textToRender.replace(/\n/g, '<br>');
+        
         content.innerHTML = html;
         msgDiv.appendChild(avatar);
         msgDiv.appendChild(content);
@@ -1612,11 +1635,18 @@
            
            if (!STATE.config.apiKey && data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
+           // --- ROBUST CONTENT HANDLING ---
+           let contentRaw = STATE.config.apiKey ? data.choices?.[0]?.message?.content : data.result?.message?.content;
            let aiText = "";
-           if (STATE.config.apiKey) aiText = data.choices?.[0]?.message?.content || "Error: No content.";
-           else aiText = data.result?.message?.content || "Error: No result.";
            
-           // Handle Tool Calls (Display only for now, as we don't have a backend to execute them)
+           if (Array.isArray(contentRaw)) {
+               // Handle array response (common for tools/images in Claude)
+               aiText = contentRaw.map(c => c.text || JSON.stringify(c)).join('');
+           } else {
+               aiText = contentRaw || "Error: No content returned.";
+           }
+           
+           // Handle Tool Calls (Display only for now)
            const toolCalls = STATE.config.apiKey ? data.choices?.[0]?.message?.tool_calls : data.result?.message?.tool_calls;
            if (toolCalls) {
                aiText += "\n\n**Tool Calls Requested:**\n```json\n" + JSON.stringify(toolCalls, null, 2) + "\n```";
